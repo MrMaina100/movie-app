@@ -8,7 +8,7 @@ const global = {
 //get data 
 async function fetchApiData(endpoint){
 
-   const API_KEY = '226ef6cc048354b80d241b56c066843e';
+   const API_KEY = '';
    const Api_URL = 'https://api.themoviedb.org/3/';
 
    showSpinner();
