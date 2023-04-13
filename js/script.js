@@ -75,6 +75,9 @@ async function getMovieDetails (){
    const movieId = window.location.search.split('=')[1]
    // console.log(movieId);
    const movie = await fetchApiData(`movie/${movieId}`);
+
+  displayBackDropImage('movie', movie.backdrop_path);
+
    // console.log(movie);
 
    const div = document.createElement('div');
@@ -187,6 +190,8 @@ async function getShowDetails (){
   // console.log(showID);
   const show = await fetchApiData(`tv/${showID}`);
 
+  displayBackDropImage('show', show.backdrop_path);
+
   const div = document.createElement('div');
   div.innerHTML = `
   
@@ -218,7 +223,7 @@ async function getShowDetails (){
               <i class="fas fa-star text-primary"></i>
               ${show.vote_average.toFixed(1)} / 10
             </p>
-            <p class="text-muted">Release Date:${show.air_date}</p>
+            <p class="text-muted">Last Air Date:${show.last_air_date}</p>
             <p>
               ${show.overview}
             </p>
@@ -234,7 +239,7 @@ async function getShowDetails (){
           <ul>
             <li><span class="text-secondary">Number Of Episodes:</span> ${show.number_of_episodes}</li>
             <li>
-              <span class="text-secondary">Last Episode To Air:</span> ${show.last_episode_to_air}
+              <span class="text-secondary">Last Episode To Air:</span> ${show.last_episode_to_air.name}
             </li>
             <li><span class="text-secondary">Status:</span>${show.status}</li>
           </ul>
@@ -247,6 +252,10 @@ async function getShowDetails (){
   document.querySelector('#show-details').appendChild(div)
 
 }
+
+//search functionality 
+
+
 
 const init = ()=>{
    switch(global.currentPage) {
@@ -265,8 +274,7 @@ const init = ()=>{
          getShowDetails();
       break;
       case '/search.html':
-         console.log('search');
-  
+         search();  
    }
 
    highlightLink();
@@ -307,6 +315,33 @@ function addcommastoNumbers(x){
         x = x.replace(pattern, "$1,$2");
     return x;
 }
+
+
+//function that display the image backdrop
+const displayBackDropImage = (type, path)=>{
+  const overlayDiv = document.createElement('div');
+  overlayDiv.style.backgroundImage = `url(https://image.tmdb.org/t/p/original/${path})`;
+  overlayDiv.style.backgroundSize = 'cover';
+  overlayDiv.style.backgroundPosition = 'center';
+  overlayDiv.style.backgroundRepeat = 'no-repeat';
+  overlayDiv.style.height = '100vh';
+  overlayDiv.style.width = '100vw';
+  overlayDiv.style.position = 'absolute';
+  overlayDiv.style.top = '0';
+  overlayDiv.style.left = '0';
+  overlayDiv.style.zIndex = '-1';
+  overlayDiv.style.opacity = '0.3';
+
+
+  if(type === 'movie'){
+    document.querySelector('#movie-details').appendChild(overlayDiv);
+  }else{
+    document.querySelector('#show-details').appendChild(overlayDiv);
+
+  }
+}
+
+
 
 // console.log(addcommastoNumbers(300000000000000000));
 
