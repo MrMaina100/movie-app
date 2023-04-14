@@ -1,19 +1,51 @@
 // console.log(window.location.pathname);
 
 const global = {
-   currentPage: window.location.pathname 
+   currentPage: window.location.pathname,
+
+   search:{
+    term: '',
+    type:'',
+    page:'',
+    totalPages:''
+
+   },
+
+   api:{
+    apikey:'',
+    apiUrl:'https://api.themoviedb.org/3/'
+   }
+
+   
 }
 
 
 //get data 
 async function fetchApiData(endpoint){
 
-   const API_KEY = '226ef6cc048354b80d241b56c066843e';
-   const Api_URL = 'https://api.themoviedb.org/3/';
+   const API_KEY = global.api.apikey;
+   const Api_URL = global.api.apiUrl;
 
    showSpinner();
 
    const res = await fetch(`${Api_URL}${endpoint}?api_key=${API_KEY}&language=en-US`);
+   const data = res.json();
+
+   hideSpinner();
+
+   return data;
+}
+
+
+//make request to search 
+async function searchApiData(endpoint){
+
+   const API_KEY = global.api.apikey;
+   const Api_URL = global.api.apiUrl;
+
+   showSpinner();
+
+   const res = await fetch(`${Api_URL}search/${global.search.type}?api_key=${API_KEY}&language=en-US&query=${global.search.term}`);
    const data = res.json();
 
    hideSpinner();
@@ -255,6 +287,77 @@ async function getShowDetails (){
 
 //search functionality 
 
+async function search (){
+
+  const queryString = window.location.search;
+  const urlparam = new URLSearchParams(queryString);
+  global.search.type = urlparam.get('type');
+  global.search.term = urlparam.get('search-term');
+
+  if(global.search.term !== '' && global.search.term !== null ){
+
+    const {results, total_pages, page} = await searchApiData();
+    // console.log(result);
+
+    if(results.length === 0){
+      showAlert('no results found');
+      return;
+    }
+
+    displaysearchResults(results);
+
+
+
+
+  }else{
+
+    showAlert('please enter a term')
+
+  }
+
+
+}
+
+function displaysearchResults(results){
+  results.forEach((result)=>{
+
+      const div = document.createElement('div');
+      div.classList.add('card');
+      div.innerHTML = `
+
+          <a href="${global.search.type}-details.html?id=${result.id}">
+           ${
+
+            result.poster_path
+            ?
+            ` <img
+              src="https://image.tmdb.org/t/p/w400${result.poster_path}"
+              class="card-img-top"
+              alt="${global.search.type === 'movie' ? result.title:result.name}"
+            />`: `
+                <a href="movie-details.html?id=${movie.id}">
+            <img
+              src="images/no-image.jpg"
+              class="card-img-top"
+              alt="${global.search.type === 'movie' ? result.title:result.name}"
+            />
+          </a>
+            `
+           }
+          </a>
+          <div class="card-body">
+            <h5 class="card-title">${global.search.type === 'movie' ? result.title:result.name}</h5>
+            <p class="card-text">
+              <small class="text-muted">Release:${global.search.type === 'movie' ? result.release_date : result.first_air_date}</small>
+            </p>
+          </div>
+        
+      `
+
+      document.querySelector(`#search-results`).appendChild(div);
+   });''
+}
+
 
 
 const init = ()=>{
@@ -339,6 +442,16 @@ const displayBackDropImage = (type, path)=>{
     document.querySelector('#show-details').appendChild(overlayDiv);
 
   }
+}
+
+
+const showAlert = (message, className)=>{
+  const alertEl = document.createElement('div');
+  alertEl.classList.add('alert', className);
+  alertEl.appendChild(document.createTextNode(message))
+  document.querySelector('#alert').appendChild(alertEl)
+
+  setTimeout(()=> alertEl.remove(), 5000)
 }
 
 
